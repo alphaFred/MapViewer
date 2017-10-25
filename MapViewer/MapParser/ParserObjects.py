@@ -21,8 +21,7 @@ class Section:
                 self.address, self.size))
 
     def __len__(self):
-        # TODO: implement sizeof method
-        pass
+        return self.size
 
     def append(self, line):
         self.lines.append(line)
@@ -44,7 +43,7 @@ class Section:
             self.segment = ".".join(sec_names[1:])
 
     def __parse_address(self, sec_address):
-        self.address = sec_address
+        self.address = int(sec_address, 16)
 
     def __parse_size(self, sec_size):
-        self.size = sec_size
+        self.size = int(sec_size, 16)
