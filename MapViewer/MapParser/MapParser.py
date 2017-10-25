@@ -48,13 +48,18 @@ class MapParser(object):
 
         with open(out_file_path, "w") as out_file:
             out_file.write("<html><head>")
-            out_file.write("<style>a { color: black; text-decoration: none; font-family:monospace }</style>")
+            out_file.write(
+                "<style>a { color: black; text-decoration: none; font-family:"
+                "monospace }</style>")
             out_file.write("<body>")
             out_file.write("<table cellspacing='1px'>")
             for i, sec in enumerate(self.sections[1:]):
                 height = (total_height / total_size) * len(sec)
                 font_size = 1.0 if height > 1.0 else height
-                out_file.write("<tr style='background-color:#%s;height:%gem;line-height:%gem;font-size:%gem'><td style='overflow:hidden'>" % (colors[i % len(colors)], height, height, font_size))
+                out_file.write(
+                    "<tr style='background-color:#%s;height:%gem;line-height:"
+                    "%gem;font-size:%gem'><td style='overflow:hidden'>" % (
+                        colors[i % len(colors)], height, height, font_size))
                 out_file.write("<a href='#%s'>%s</a>" % (str(sec), str(sec)))
                 out_file.write("</td></tr>")
             out_file.write("</table>")
