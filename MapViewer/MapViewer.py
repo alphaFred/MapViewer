@@ -19,5 +19,3 @@ if __name__ == "__main__":
 
     if args.format == "html":
         m_parser.to_html(args.out_file)
-
-    print("Finished parsing")
