@@ -6,35 +6,77 @@ class MapParser(object):
     def __init__(self):
         self.regex_start_sec = r"^\."
         self.regex_sec = r"^\s*\d"
+        self.regex_fill = r"^\s\*"
         self.regex_start_subsec = r"^\s\."
         self.regex_ws_split = r"\s\s+"
         self.sections = []
         self.latestSection = None
+        self.active_line = ""
+        self.map_file = None
+        self.line_iter = None
+
+    def __get_line(self):
+        for line in self.map_file:
+            yield line
+
+    def __update_line(self):
+        if self.line_iter is None:
+            self.line_iter = self.__get_line()
+            next(self.line_iter)
+            self.active_line = next(self.line_iter)
+        else:
+            self.active_line = next(self.line_iter)
 
     def parse(self, map_file):
-        self.latestSection = Section()
-        in_section = False
-
-        for line in map_file:
-            if re.match(self.regex_start_sec, line):
-                if in_section:
-                    self.__finish_section()
-                self.latestSection.append(line)
-                in_section = True
-            elif re.match(self.regex_start_subsec, line):
-                if in_section:
-                    self.__finish_section()
-                self.latestSection.append(line)
-                in_section = True
-            elif re.match(self.regex_sec, line):
-                self.latestSection.append(line)
-                in_section = True
-            else:
-                self.__finish_section()
-                in_section = False
-        # process each section
+        try:
+            self.map_file = map_file
+            self.__update_line()
+            while True:
+                if re.match(self.regex_start_sec, self.active_line):
+                    section = Section()
+                    self.__parse_section(section)
+                    self.sections.append(section)
+                else:
+                    self.__update_line()
+        except StopIteration:
+            pass
         [s.parse() for s in self.sections]
-        pass
+        print("finished parsing")
+
+    def __parse_section(self, section):
+        try:
+            section.append(self.active_line)
+            self.__update_line()
+            while True:
+                if re.match(self.regex_sec, self.active_line):
+                    section.append(self.active_line)
+                    self.__update_line()
+                elif re.match(self.regex_fill, self.active_line):
+                    self.__update_line()
+                elif re.match(self.regex_start_subsec, self.active_line):
+                    sub_section = Section()
+                    self.__parse_subsection(sub_section)
+                    section.add_subsection(sub_section)
+                    self.__update_line()
+                else:
+                    return
+        except StopIteration:
+            return
+
+    def __parse_subsection(self, section):
+        try:
+            section.append(self.active_line)
+            self.__update_line()
+            while True:
+                if re.match(self.regex_sec, self.active_line):
+                    section.append(self.active_line)
+                    self.__update_line()
+                elif re.match(self.regex_fill, self.active_line):
+                    self.__update_line()
+                else:
+                    return
+        except StopIteration:
+            return
 
     def __finish_section(self):
         if len(self.latestSection.lines) != 0:
