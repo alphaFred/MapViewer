@@ -5,6 +5,7 @@ class Section:
         self.segment = ""
         self.section = ""
         self.lines = []
+        self.sub_sections = []
 
     def __str__(self):
         if self.segment:
@@ -26,6 +27,9 @@ class Section:
     def append(self, line):
         self.lines.append(line)
 
+    def add_subsection(self, section):
+        self.sub_sections.append(section)
+
     def parse(self):
         if len(self.lines[0].split()) == 1:
             self.__parse_name(self.lines[0])
@@ -35,6 +39,8 @@ class Section:
             self.__parse_name(self.lines[0].split()[0])
             self.__parse_address(self.lines[0].split()[1])
             self.__parse_size(self.lines[0].split()[2])
+        for sub_section in self.sub_sections:
+            sub_section.parse()
 
     def __parse_name(self, sec_name):
         sec_names = list(filter(None, sec_name.strip().split(".")))
